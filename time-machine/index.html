@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>时光机-和神光学习</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+    <script src="https://www.unpkg.com/three@0.154.0/build/three.js"></script>
+  </head>
+  <body>
+    <script>
+      const width = window.innerWidth; // 获取窗口宽度
+      const height = window.innerHeight; // 获取窗口高度
+      const camera = new THREE.PerspectiveCamera(45, (width/2) / (height/2), 0.1, 1000); // 创建透视相机
+
+      const scene = new THREE.Scene(); // 创建场景
+      const renderer = new THREE.WebGLRenderer(); // 创建渲染器
+
+      renderer.setSize(width, height); // 设置渲染器尺寸
+      camera.position.set(0, 0, 500); // 设置相机位置
+      camera.lookAt(scene.position); // 相机对准场景中心
+
+      const pointLight = new THREE.PointLight(0xffffff); // 创建点光源
+      pointLight.position.set(0, 0, 500); // 设置点光源位置
+      scene.add(pointLight); // 将点光源添加到场景中
+
+      document.body.appendChild(renderer.domElement); // 将渲染器的 DOM 元素添加到文档中
+
+      let tunnel; // 定义隧道对象
+      let stormTexture; // 定义暴风雨纹理对象
+      function create() {
+        const textureLoader = new THREE.TextureLoader();
+
+        // 加载暴风雨纹理图片
+        textureLoader.load("storm.jpg", function (texture) {
+          stormTexture = texture;
+
+          texture.wrapS = texture.wrapT = THREE.RepeatWrapping; // 设置纹理重复方式为 RepeatWrapping
+          texture.repeat.set(1, 2); // 设置纹理重复次数为 (1, 2)
+
+          // 创建圆柱几何体
+          const geometry = new THREE.CylinderGeometry(
+            30,
+            50,
+            1000,
+            32,
+            32,
+            true
+          );
+          const material = new THREE.MeshPhongMaterial({
+            transparent: true, // 启用透明度
+            alphaMap: texture, // 设置透明度纹理为暴风雨纹理
+            side: THREE.BackSide, // 设置材质的背面渲染
+          });
+          tunnel = new THREE.Mesh(geometry, material); // 创建隧道网格对象
+
+          tunnel.rotation.x = -Math.PI / 2; // 将隧道绕 x 轴旋转 -90 度
+
+          scene.add(tunnel); // 将隧道添加到场景中
+        });
+
+        // 加载金属纹理图片
+        textureLoader.load("metal.png", function (texture) {
+          texture.wrapS = texture.wrapT = THREE.RepeatWrapping; // 设置纹理重复方式为 RepeatWrapping
+          texture.repeat.set(10, 10); // 设置纹理重复次数为 (10, 10)
+
+          // 创建立方体几何体
+          const geometry = new THREE.BoxGeometry(30, 2, 30);
+          const material = new THREE.MeshPhongMaterial({
+            map: texture, // 设置材质的贴图为金属纹理
+          });
+
+          const cube = new THREE.Mesh(geometry, material); // 创建立方体网格对象
+          cube.position.z = 460; // 设置立方体的 Z 坐标
+          cube.position.y = -20; // 设置立方体的 Y 坐标
+          scene.add(cube); // 将立方体添加到场景中
+        });
+      }
+
+      let H = 0; // 初始化颜色参数 H
+      function render() {
+        renderer.render(scene, camera); // 渲染场景和相机
+
+        H += 0.002; // 增加颜色参数 H 的值
+        if (H > 1) {
+          H = 0;
+        }
+
+        if (tunnel) {
+          tunnel.material.color.setHSL(H, 0.5, 0.5); // 设置隧道材质的颜色
+
+          tunnel.rotation.y += 0.01; // 隧道绕 y 轴旋转
+          stormTexture.offset.y += 0.01; // 调整暴风雨纹理的偏移量
+        }
+        requestAnimationFrame(render); // 循环渲染函数
+      }
+
+      create(); // 创建场景内容
+      render(); // 开始渲染循环
+    </script>
+  </body>
+</html>
