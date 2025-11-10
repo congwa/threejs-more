@@ -1,6 +1,10 @@
 # threejs-more
 Multiple three.js linked small examples.
 
+## 归档说明
+
+受精力所限，不打算在three.js 3d方向深挖，解惑为主
+
 
 ## use
 
